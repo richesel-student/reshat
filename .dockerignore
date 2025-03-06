@@ -1,0 +1,7 @@
+.venv
+venv
+postgres.tar
+redis.tar
+nginx.tar
+python311.tar
+python3.tar

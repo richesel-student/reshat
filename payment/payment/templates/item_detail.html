@@ -1,0 +1,183 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <meta charset="utf-8">-->
+<!--    <title>{{ item.name }}</title>-->
+<!--    <script src="https://js.stripe.com/v3/"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--    {% if error_message %}-->
+<!--        <div class="error" style="color: red;">{{ error_message }}</div>-->
+<!--    {% endif %}-->
+
+<!--    <h1>{{ item.name }}</h1>-->
+<!--    <p>{{ item.description }}</p>-->
+<!--    <p>Цена: {{ item.price }} {{ item.currency|upper }}</p>-->
+
+<!--    <form id="payment-form">-->
+<!--        {% csrf_token %}-->
+<!--        <div id="card-element">&lt;!&ndash; Stripe Card Element &ndash;&gt;</div>-->
+<!--        <button id="submit">Оплатить</button>-->
+<!--        <div id="error-message"></div>-->
+<!--    </form>-->
+
+<!--    <script type="text/javascript">-->
+<!--        var stripe = Stripe('{{ stripe_public_key }}');-->
+<!--        var elements = stripe.elements();-->
+<!--        var card = elements.create('card');-->
+<!--        card.mount('#card-element');-->
+
+<!--        var form = document.getElementById('payment-form');-->
+<!--        var clientSecret = '{{ client_secret }}'; // Получаем client_secret из шаблона-->
+
+<!--        form.addEventListener('submit', function(ev) {-->
+<!--            ev.preventDefault();-->
+
+<!--            stripe.confirmCardPayment(clientSecret, { // Используем clientSecret из шаблона-->
+<!--                payment_method: { card: card }-->
+<!--            }).then(function(result) {-->
+<!--                if (result.error) {-->
+<!--                    document.getElementById('error-message').textContent = result.error.message;-->
+<!--                } else {-->
+<!--                    if (result.paymentIntent.status === 'succeeded') {-->
+<!--                        window.location.href = '/success/';-->
+<!--                    }-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <meta charset="utf-8">-->
+<!--    <title>{{ item.name }}</title>-->
+<!--    <script src="https://js.stripe.com/v3/"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--    {% if error_message %}-->
+<!--        <div class="error" style="color: red;">{{ error_message }}</div>-->
+<!--    {% endif %}-->
+
+<!--    <h1>{{ item.name }}</h1>-->
+<!--    <p>{{ item.description }}</p>-->
+<!--    <p>Цена: {{ item.price }} {{ item.currency|upper }}</p>-->
+
+<!--    <form id="payment-form">-->
+<!--        {% csrf_token %}-->
+<!--        <div id="card-element">&lt;!&ndash; Stripe Card Element &ndash;&gt;</div>-->
+<!--        <button id="submit" type="submit">Оплатить</button>-->
+<!--        <div id="error-message"></div>-->
+<!--    </form>-->
+
+<!--    <script type="text/javascript">-->
+<!--        var stripe = Stripe('{{ stripe_public_key }}');-->
+<!--        var elements = stripe.elements();-->
+<!--        var card = elements.create('card');-->
+<!--        card.mount('#card-element');-->
+
+<!--        var form = document.getElementById('payment-form');-->
+
+<!--        form.addEventListener('submit', function(ev) {-->
+<!--            ev.preventDefault();-->
+
+<!--            // Отправляем POST-запрос для создания PaymentIntent-->
+<!--            fetch('/buy/{{ item.id }}/', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                    'X-CSRFToken': '{{ csrf_token }}'-->
+<!--                }-->
+<!--            })-->
+<!--            .then(function(response) { return response.json(); })-->
+<!--            .then(function(data) {-->
+<!--                if(data.error){-->
+<!--                    document.getElementById('error-message').textContent = data.error;-->
+<!--                    return;-->
+<!--                }-->
+<!--                var clientSecret = data.client_secret;-->
+<!--                stripe.confirmCardPayment(clientSecret, {-->
+<!--                    payment_method: { card: card }-->
+<!--                }).then(function(result) {-->
+<!--                    if (result.error) {-->
+<!--                        document.getElementById('error-message').textContent = result.error.message;-->
+<!--                    } else {-->
+<!--                        if (result.paymentIntent.status === 'succeeded') {-->
+<!--                            window.location.href = '/success/';-->
+<!--                        }-->
+<!--                    }-->
+<!--                });-->
+<!--            })-->
+<!--            .catch(function(error) {-->
+<!--                console.error('Ошибка:', error);-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    {% if error_message %}
+        <div class="error" style="color: red;">{{ error_message }}</div>
+    {% endif %}
+
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <p>Цена: {{ item.price }} {{ item.currency|upper }}</p>
+
+    <form id="payment-form">
+        {% csrf_token %}
+        <div id="card-element"><!-- Stripe Card Element --></div>
+        <button id="submit" type="submit">Оплатить</button>
+        <div id="error-message"></div>
+    </form>
+
+    <script type="text/javascript">
+        var stripe = Stripe('{{ stripe_public_key }}');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.mount('#card-element');
+
+        var form = document.getElementById('payment-form');
+
+        form.addEventListener('submit', function(ev) {
+            ev.preventDefault();
+
+            fetch('/buy/{{ item.id }}/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if(data.error){
+                    document.getElementById('error-message').textContent = data.error;
+                    return;
+                }
+                // Используем новый client_secret, полученный от сервера
+                stripe.confirmCardPayment(data.client_secret, {
+                    payment_method: { card: card }
+                }).then(function(result) {
+                    if (result.error) {
+                        document.getElementById('error-message').textContent = result.error.message;
+                    } else if (result.paymentIntent.status === 'succeeded') {
+                        window.location.href = '/success/';
+                    }
+                });
+            })
+            .catch(function(error) {
+                console.error('Ошибка:', error);
+            });
+        });
+    </script>
+</body>
+</html>

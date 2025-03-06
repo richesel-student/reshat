@@ -1,0 +1,22 @@
+[project]
+name = "reshat"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "richesel-student", email = "rinatdevlieamov@gmail.com"},
+    {name = "pdm update", email = "rinatdevlieamov@gmail.com"},
+]
+dependencies = [
+    'Django==5.1.2',
+    'stripe==11.6.0',
+    'uwsgi==2.0.28',
+#    "psycopg2>=2.9.10",
+    "psycopg2-binary>=2.9.10",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
